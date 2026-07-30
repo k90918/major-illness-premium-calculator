@@ -1,0 +1,9 @@
+{
+  "name": "重大傷病保費試算器",
+  "short_name": "保費試算",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f7f8",
+  "theme_color": "#0b3a53",
+  "lang": "zh-Hant"
+}

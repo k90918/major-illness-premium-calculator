@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3a53" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="保費試算" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>重大傷病保費試算器</title>
+  <style>
+    :root{--navy:#0b3a53;--blue:#176b87;--teal:#0f8a83;--bg:#f3f7f8;--ink:#142a33;--muted:#61747c;--line:#d7e2e5;--card:#fff;--warn:#8c5311}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+    .app{max-width:680px;margin:auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom))}
+    header{padding:8px 4px 18px} h1{font-size:26px;letter-spacing:.02em;margin:0 0 7px;color:var(--navy)} header p{margin:0;font-size:14px;line-height:1.55;color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 12px #1232 10}
+    h2{font-size:16px;margin:0 0 14px;color:var(--navy)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+    label{display:block;font-size:13px;font-weight:650;color:#38505a;margin:0 0 6px} input,select{appearance:none;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #b9cbd1;border-radius:11px;background:#fff;color:var(--ink);min-height:46px} input:focus,select:focus{outline:3px solid #bfe8e5;border-color:var(--teal)}
+    .note{font-size:12px;color:var(--muted);line-height:1.55;margin:12px 0 0}.btn{border:0;border-radius:12px;width:100%;min-height:51px;color:white;background:var(--teal);font-size:17px;font-weight:700;letter-spacing:.04em;margin-top:15px}.btn:active{transform:scale(.99);background:#08726c}
+    .person{display:flex;align-items:center;gap:10px;background:#e8f5f4;padding:11px 13px;border-radius:12px;color:#185f60;font-size:14px;margin-bottom:13px}.person strong{font-size:16px}
+    .result-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.result-title h2{margin:0}.badge{font-size:11px;padding:4px 7px;border-radius:20px;background:#eaf1f3;color:#47636d}.result-row{display:flex;align-items:baseline;justify-content:space-between;padding:13px 0;border-bottom:1px solid #e5edef;gap:12px}.result-row:last-of-type{border-bottom:0}.result-row span{font-size:14px;color:#48606a}.result-row b{font-variant-numeric:tabular-nums;font-size:20px;color:var(--navy);white-space:nowrap}.result-row.emphasis{background:#edf9f7;margin:8px -10px 0;padding:15px 10px;border-radius:12px;border:0}.result-row.emphasis b{color:var(--teal);font-size:23px}.helper{font-size:12px;line-height:1.55;color:var(--muted);margin:13px 0 0}.warning{display:none;margin-top:12px;padding:10px 12px;background:#fff4e4;color:var(--warn);border-radius:10px;font-size:13px;line-height:1.5}.foot{font-size:11px;color:#74868d;line-height:1.6;padding:3px 5px}.hidden{display:none}
+    @media(max-width:390px){.grid{grid-template-columns:1fr}.full{grid-column:auto}h1{font-size:23px}}
+  </style>
+</head>
+<body><main class="app">
+<header><h1>重大傷病保費試算器</h1><p>輸入基本資料，即時計算 IKC 與 NGODCR 保費。</p></header>
+<section class="card"><h2>要保人資料</h2><div class="grid">
+  <div class="full"><label for="name">姓名</label><input id="name" autocomplete="name" placeholder="例如：王小明" /></div>
+  <div><label for="dob">出生年月日</label><input id="dob" type="date" /></div>
+  <div><label for="gender">性別</label><select id="gender"><option value="male">男性</option><option value="female">女性</option></select></div>
+</div></section>
+<section class="card"><h2>投保內容</h2><div class="grid">
+  <div><label for="term">IKC 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
+  <div><label for="ikcAmount">IKC 保額（元）</label><input id="ikcAmount" inputmode="numeric" value="1000000" /></div>
+  <div class="full"><label for="ngoAmount">NGODCR 保額（元）</label><input id="ngoAmount" inputmode="numeric" value="500000" /></div>
+</div><p class="note">NGODCR 提供 20 年、25 年及至期滿的逐年費率累計比較；本版依費率表最後一列（84歲）作為期滿試算終點。</p><button class="btn" id="calculate">立即試算</button></section>
+<section class="card" id="results" aria-live="polite"><div class="result-title"><h2>試算結果</h2><span class="badge" id="ageBadge">請輸入出生年月日</span></div>
+<div id="person" class="person hidden"></div>
+<div class="result-row"><span>IKC 年繳保費</span><b id="ikcAnnual">—</b></div>
+<div class="result-row"><span>NGODCR 首年保費</span><b id="ngoAnnual">—</b></div>
+<div class="result-row"><span>IKC 合計總繳保費</span><b id="ikcTotal">—</b></div>
+<div class="result-row"><span>NGODCR 20年累計保費</span><b id="ngo20Total">—</b></div>
+<div class="result-row"><span>NGODCR 25年累計保費</span><b id="ngo25Total">—</b></div>
+<div class="result-row emphasis"><span>NGODCR 至期滿累計保費</span><b id="ngoMaturityTotal">—</b></div>
+<p class="helper" id="detail">請填寫出生年月日後試算。</p><p class="warning" id="warning"></p></section>
+<p class="foot">費率依所提供之 IKC（113.01.01）及 NGODCR 費率表建置；單位為每萬元保額之年繳保費。實際承保、保費與商品條款仍以保險公司核保及當時公告為準。</p>
+</main><script>
+// 每萬元保額年繳費率；索引為投保年齡（0歲起）
+const IKC={
+  10:{male:[398,405,411,416,424,431,439,449,458,468,478,482,487,497,509,520,532,542,553,562,573,575,579,591,602,615,627,639,653,667,680,681,686,702,716,727,740,755,769,787,797,802,811,825,841,857,876,891,899,917,935,953,972,991,1013,1041,1113,1194,1287,1415,1536,1672,1836,1880,2064,2455],female:[386,391,397,403,410,418,426,435,445,455,465,468,472,483,493,503,514,524,535,546,556,558,563,574,585,596,608,620,632,645,653,658,663,676,689,703,717,726,740,754,769,774,777,793,808,823,839,849,852,867,881,896,911,927,942,958,975,992,1012,1039,1059,1131,1204,1320,1414,1519]},
+  20:{male:[218,221,225,226,228,228,233,238,244,248,254,257,263,269,275,281,287,293,298,304,309,311,313,320,326,333,340,348,356,362,370,373,377,386,394,404,413,423,433,444,454,466,478,490,504,515,538,548,577,612,650,690,735,783,836,892],female:[211,213,217,217,221,221,226,230,236,241,247,248,254,260,266,272,277,283,289,294,300,302,305,311,318,324,331,338,345,352,357,361,364,372,380,389,398,407,416,426,436,447,458,469,481,492,498,502,515,533,550,577,605,635,667,702]},
+  30:{male:[155,158,161,162,165,168,171,175,179,183,188,189,194,198,203,207,212,216,221,225,230,231,233,238,242,248,254,260,266,273,279,282,288,295,303,313,321,331,345,357,382,388,415,440,472,502],female:[150,152,154,157,159,162,166,169,174,177,182,183,187,192,196,201,205,210,214,218,225,225,226,231,236,242,247,252,258,265,272,273,279,286,293,300,308,317,326,338,352,358,377,396,423,444]}
+};
+// IKC 各繳費年期均依原始費率表對應欄位建置。
+const NGO={male:[45.2,36.9,30.2,24.9,20.5,17,14.1,11.8,11.8,11.8,11.8,11.9,11.9,13.1,14.6,16.5,18.7,21.5,22.9,24.4,26.1,27.9,30,30.1,30.3,30.6,31,31.5,33.9,36.6,37.2,40.4,44.1,47.8,51.9,56.5,61.8,67.7,72.3,72.1,74.4,82.1,90.7,96.7,103.4,110.7,118.8,127.6,137.4,148.1,151.9,163.9,176.9,188.8,201.5,215.2,229.9,245.7,261.3,278,294.1,313,333.2,355,378.3,403.3,412.7,440.2,463.5,488.3,514.6,542.8,572.8,597.6,623.7,651.3,680.4,711.2,730.4,751.1,773.4,797.3,823.3,852.6,883],female:[41.3,33,26.4,21.3,17.2,14,11.5,9.4,10,10.6,11.2,11.9,12.7,13.8,15,16.3,17.7,19.3,20.7,22.3,24,25.8,27.9,29.4,31,32.9,35,37.4,39.1,39.2,39,42,45.3,49.5,54.2,59.3,65,71.3,76.8,82.8,84.3,91.3,99.1,106.1,113.7,121.9,130.7,140.3,147.2,149.6,151,158.7,166.9,174.5,182.6,191,199.9,209.3,219.3,229.9,234.8,246.5,258.9,272.8,287.5,303.3,306.8,324,339.8,356.7,374.8,394.1,414.8,433.9,454.4,476.3,499.9,525.2,548.5,573.7,600.7,629.9,661.5,692.2,721.5]};
+function ageOn(d){const b=new Date(d+'T00:00:00'),t=new Date();let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a}
+const money=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
+const num=id=>Number(String(document.getElementById(id).value).replace(/[^0-9.]/g,''));
+function calc(){const birth=document.getElementById('dob').value,gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ikcAmt=num('ikcAmount'),ngoAmt=num('ngoAmount'),warn=document.getElementById('warning');warn.style.display='none';
+ if(!birth||!ikcAmt||!ngoAmt){document.getElementById('detail').textContent='請完整填寫出生年月日與兩項保額。';return}const age=ageOn(birth);if(age<0){document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
+ const rate=IKC[term][gender][age],ngoRate=NGO[gender][age];if(rate===undefined||ngoRate===undefined){document.getElementById('detail').textContent='此年齡超出目前內建費率表的可試算範圍。';return}
+ const unitsI=ikcAmt/10000,unitsN=ngoAmt/10000,ia=rate*unitsI,na=ngoRate*unitsN;
+ const sumNgo=years=>{let total=0,covered=0;for(let i=0;i<years;i++){const r=NGO[gender][age+i];if(r===undefined)break;total+=r*unitsN;covered++}return {total,covered}};
+ const ngo20=sumNgo(20),ngo25=sumNgo(25),ngoMaturity=sumNgo(NGO[gender].length-age);
+ document.getElementById('ageBadge').textContent=`投保年齡：${age}歲`;const n=document.getElementById('name').value.trim(),p=document.getElementById('person');p.classList.toggle('hidden',!n);p.innerHTML=n?`<strong>${n}</strong><span>${gender==='male'?'男性':'女性'}・${age}歲・IKC ${term}年繳</span>`:'';
+ document.getElementById('ikcAnnual').textContent=money(ia);document.getElementById('ngoAnnual').textContent=money(na);document.getElementById('ikcTotal').textContent=money(ia*term);document.getElementById('ngo20Total').textContent=money(ngo20.total);document.getElementById('ngo25Total').textContent=money(ngo25.total);document.getElementById('ngoMaturityTotal').textContent=money(ngoMaturity.total);document.getElementById('detail').textContent=`NGODCR 期滿累計係自 ${age} 歲起，依費率表累計至 ${NGO[gender].length-1} 歲（共 ${ngoMaturity.covered} 年）。`;
+ if(ngo20.covered<20||ngo25.covered<25){warn.textContent=`費率表僅提供至 ${NGO[gender].length-1} 歲；20年或25年累計可能未涵蓋完整期間，請留意。`;warn.style.display='block'}
+}
+document.getElementById('calculate').addEventListener('click',calc);document.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',calc));
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./service-worker.js');
+</script></body></html>
