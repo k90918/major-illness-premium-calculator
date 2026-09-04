@@ -25,8 +25,15 @@ class CalculatorRequirementsTest(unittest.TestCase):
             assert match is not None
             self.assertNotRegex(match.group(0), r'value="[1-9][0-9]*"')
 
+    def test_amount_fields_use_ten_thousand_dollar_units(self):
+        for product in ("IKC", "GWL", "NGODCR"):
+            self.assertIn(f"{product} 保額（萬元）", HTML)
+        self.assertNotIn("unitsI=ikcAmt/10000", HTML)
+        self.assertNotIn("unitsG=gwlAmt/10000", HTML)
+        self.assertNotIn("unitsN=ngoAmt/10000", HTML)
+
     def test_blank_amounts_are_explicitly_calculated_as_zero(self):
-        for expression in ("unitsI=ikcAmt/10000", "unitsG=gwlAmt/10000", "unitsN=ngoAmt/10000"):
+        for expression in ("unitsI=ikcAmt", "unitsG=gwlAmt", "unitsN=ngoAmt"):
             self.assertIn(expression, HTML)
         self.assertNotRegex(HTML, r"if\([^\n]*!ikcAmt[^\n]*!ngoAmt")
         self.assertIn("rateForAmount", HTML)

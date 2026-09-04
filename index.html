@@ -36,14 +36,14 @@
 </div></section>
 <section class="card"><h2>投保內容</h2><div class="grid">
   <div><label for="term">IKC 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
-  <div><label for="ikcAmount">IKC 保額（元）</label><input id="ikcAmount" inputmode="numeric" placeholder="未輸入則為0" /></div>
+  <div><label for="ikcAmount">IKC 保額（萬元）</label><input id="ikcAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
 </div><p class="note">IKC 保額未輸入時，試算結果為 0 元。</p></section>
 <section class="card"><h2>GWL 小額終身壽險</h2><div class="grid">
   <div><label for="gwlTerm">GWL 繳費年期</label><select id="gwlTerm"><option value="6">6年繳</option><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option></select></div>
-  <div><label for="gwlAmount">GWL 保額（元）</label><input id="gwlAmount" inputmode="numeric" placeholder="未輸入則為0" /></div>
+  <div><label for="gwlAmount">GWL 保額（萬元）</label><input id="gwlAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
 </div><p class="note">GWL 為終身壽險；合計總繳保費＝年繳保費 × 所選繳費年期。未輸入保額時為 0 元。</p></section>
 <section class="card"><h2>附加 NGODCR</h2><div class="grid">
-  <div class="full"><label for="ngoAmount">NGODCR 保額（元）</label><input id="ngoAmount" inputmode="numeric" placeholder="未輸入則為0" /></div>
+  <div class="full"><label for="ngoAmount">NGODCR 保額（萬元）</label><input id="ngoAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
 </div><p class="note">可單獨輸入保額試算；提供 20 年、25 年及至 84 歲的逐年費率累計比較。未輸入保額時為 0 元。</p><button class="btn" id="calculate">立即試算</button></section>
 <section class="card" id="results" aria-live="polite"><div class="result-title"><h2>試算結果</h2><span class="badge" id="ageBadge">請輸入出生年月日</span></div>
 <div id="person" class="person hidden"></div>
@@ -80,7 +80,7 @@ const rateForAmount=(rates,amount)=>amount===0?0:rates;
 function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ikcAmt=num('ikcAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';
  if(!birth){document.getElementById('detail').textContent='請完整填寫正確的民國出生年月日。';return}const age=ageOn(birth);if(age<0){document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
  const rate=rateForAmount(IKC[term][gender][age],ikcAmt),ngoRate=rateForAmount(NGO[gender][age],ngoAmt),gwlRate=rateForAmount(GWL[gwlTerm][gender][age],gwlAmt);if(rate===undefined||ngoRate===undefined||gwlRate===undefined){document.getElementById('detail').textContent='有輸入保額的商品，其年齡超出目前內建費率表的可試算範圍。';return}
- const unitsI=ikcAmt/10000,unitsG=gwlAmt/10000,unitsN=ngoAmt/10000,ia=rate*unitsI,na=ngoRate*unitsN,ga=gwlRate*unitsG;
+ const unitsI=ikcAmt,unitsG=gwlAmt,unitsN=ngoAmt,ia=rate*unitsI,na=ngoRate*unitsN,ga=gwlRate*unitsG;
  const sumNgo=years=>{let total=0,covered=0;for(let i=0;i<years;i++){const r=NGO[gender][age+i];if(r===undefined)break;total+=r*unitsN;covered++}return {total,covered}};
  const ngo20=sumNgo(20),ngo25=sumNgo(25),ngoMaturity=sumNgo(NGO[gender].length-age);
  document.getElementById('ageBadge').textContent=`投保年齡：${age}歲`;const n=document.getElementById('name').value.trim(),p=document.getElementById('person');p.classList.toggle('hidden',!n);p.innerHTML=n?`<strong>${n}</strong><span>${gender==='male'?'男性':'女性'}・${age}歲・民國 ${num('rocYear')} 年出生</span>`:'';

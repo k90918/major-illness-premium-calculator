@@ -24,7 +24,7 @@ function run(amounts) {
   };
   const navigator = {};
   const location = { protocol: 'file:' };
-  eval(script + '\ncalc();');
+  eval(script + "\ncalc(); elements._oneNgoUnit = money(NGO[document.getElementById('gender').value][ageOn(rocBirthDate())]);");
   return elements;
 }
 
@@ -39,9 +39,10 @@ for (const id of ['ikcAnnual', 'ikcTotal', 'gwlAnnual', 'gwlTotal', 'ngoAnnual',
   assert(isZeroCurrency(blank[id].textContent), `空白保額的 ${id} 應為 0 元，實際為 ${blank[id].textContent}`);
 }
 
-const ngoOnly = run({ ngo: '500000' });
+const ngoOnly = run({ ngo: '1' });
 assert(isZeroCurrency(ngoOnly.ikcAnnual.textContent), 'NGODCR 單獨試算時 IKC 應為 0');
 assert(isZeroCurrency(ngoOnly.gwlAnnual.textContent), 'NGODCR 單獨試算時 GWL 應為 0');
 assert(!isZeroCurrency(ngoOnly.ngoAnnual.textContent), 'NGODCR 單獨試算應產生保費');
 assert(!isZeroCurrency(ngoOnly.ngo20Total.textContent), 'NGODCR 單獨試算應產生 20 年累計保費');
+assert(ngoOnly.ngoAnnual.textContent === ngoOnly._oneNgoUnit, '輸入 1 應代表保額 1 萬元');
 console.log('通過：空白保額歸零、NGODCR 可單獨試算、民國日期可計算');
