@@ -68,6 +68,12 @@ class CalculatorRequirementsTest(unittest.TestCase):
             HTML.index("NGODCR 首年保費"),
         )
 
+    def test_insurance_age_and_countdown_are_shown_and_used(self):
+        self.assertIn('id="insuranceAge"', HTML)
+        self.assertIn('id="ageCountdown"', HTML)
+        self.assertIn("function insuranceAgeOn(", HTML)
+        self.assertIn("const pricingAge=insurance.insuranceAge", HTML)
+
 
 if __name__ == "__main__":
     unittest.main()

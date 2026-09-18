@@ -9,7 +9,7 @@ function run(amounts, overrides = {}) {
     gwlAmount: amounts.gwl || '', ngoAmount: amounts.ngo || '',
     ...overrides
   };
-  const ids = ['warning', 'detail', 'ageBadge', 'person', 'ijsbAnnual', 'ngoAnnual',
+  const ids = ['warning', 'detail', 'ageBadge', 'person', 'insuranceAge', 'ageCountdown', 'ijsbAnnual', 'ngoAnnual',
     'ijsbTotal', 'gwlAnnual', 'gwlTotal', 'ngo20Total', 'ngo25Total',
     'ngoMaturityTotal', 'calculate'];
   const elements = {};
@@ -25,7 +25,7 @@ function run(amounts, overrides = {}) {
   };
   const navigator = {};
   const location = { protocol: 'file:' };
-  eval(script + "\ncalc(); elements._oneNgoUnit = money(NGO[document.getElementById('gender').value][ageOn(rocBirthDate())]); elements._ijsbLengths = [10,15,20,30].map(term => [IJSB[term].male.length, IJSB[term].female.length]);");
+  eval(script + "\ncalc(); elements._insurance = insuranceAgeOn(rocBirthDate()); elements._oneNgoUnit = money(NGO[document.getElementById('gender').value][elements._insurance.insuranceAge]); elements._fixedBefore = insuranceAgeOn(new Date(2000,0,1), new Date(2026,6,1)); elements._fixedIncreaseDay = insuranceAgeOn(new Date(2000,0,1), new Date(2026,6,2)); elements._ijsbLengths = [10,15,20,30].map(term => [IJSB[term].male.length, IJSB[term].female.length]);");
   return elements;
 }
 
@@ -47,13 +47,28 @@ assert(!isZeroCurrency(ngoOnly.ngoAnnual.textContent), 'NGODCR 單獨試算應�
 assert(!isZeroCurrency(ngoOnly.ngo20Total.textContent), 'NGODCR 單獨試算應產生 20 年累計保費');
 assert(ngoOnly.ngoAnnual.textContent === ngoOnly._oneNgoUnit, '輸入 1 應代表保額 1 萬元');
 assert(JSON.stringify(ngoOnly._ijsbLengths) === JSON.stringify([[66,66],[61,61],[56,56],[46,46]]), 'IJSB 各年期費率筆數不正確');
+assert(ngoOnly.insuranceAge.textContent === `${ngoOnly._insurance.insuranceAge} 歲`, '應顯示保險年齡');
+assert(ngoOnly.ageCountdown.textContent === `${ngoOnly._insurance.daysToNextIncrease} 天`, '應顯示距保險年齡增加一歲的天數');
+assert(ngoOnly._fixedBefore.actualAge === 26 && ngoOnly._fixedBefore.insuranceAge === 26, '滿六個月當天尚不應增加保險年齡');
+assert(ngoOnly._fixedBefore.daysToNextIncrease === 1, '滿六個月當天應顯示倒數 1 天');
+assert(ngoOnly._fixedIncreaseDay.insuranceAge === 27, '超過六個月的第一天應增加保險年齡');
+
+const today = new Date();
+const sevenMonthsAgo = new Date(today.getFullYear() - 40, today.getMonth() - 7, 1);
+const insuranceAgePricing = run({ ngo: '1' }, {
+  rocYear: String(sevenMonthsAgo.getFullYear() - 1911),
+  birthMonth: String(sevenMonthsAgo.getMonth() + 1),
+  birthDay: '1'
+});
+assert(insuranceAgePricing._insurance.insuranceAge === insuranceAgePricing._insurance.actualAge + 1, '超過生日六個月後保險年齡應進位');
+assert(insuranceAgePricing.ngoAnnual.textContent === insuranceAgePricing._oneNgoUnit, '保費應依保險年齡查表');
 
 const overAmount = run({ ijsb: '501' });
 assert(overAmount.ijsbAnnual.textContent === '不適用', 'IJSB 超過 500 萬元時應顯示不適用');
 assert(overAmount.warning.textContent.includes('最高 500 萬元'), 'IJSB 超過 500 萬元時應顯示保額限制');
 
-const rocYearAge18 = String(new Date().getFullYear() - 1911 - 18);
-const underAge = run({ ijsb: '100' }, { rocYear: rocYearAge18, birthMonth: '1', birthDay: '1' });
+const rocYearAge18 = String(today.getFullYear() - 1911 - 18);
+const underAge = run({ ijsb: '100' }, { rocYear: rocYearAge18, birthMonth: String(today.getMonth() + 1), birthDay: String(today.getDate()) });
 assert(underAge.ijsbAnnual.textContent === '不適用', '未滿 19 歲時 IJSB 應顯示不適用');
 assert(underAge.warning.textContent.includes('最低投保年齡為 19 歲'), '未滿 19 歲時應顯示年齡限制');
 
