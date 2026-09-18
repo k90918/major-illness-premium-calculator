@@ -46,6 +46,14 @@ class CalculatorRequirementsTest(unittest.TestCase):
         self.assertIn("IJSB 年繳保費", HTML)
         self.assertIn("IJSB 合計總繳保費", HTML)
 
+    def test_ijsb_underwriting_limits_are_present(self):
+        amount = re.search(r'<input[^>]*id="ijsbAmount"[^>]*>', HTML)
+        self.assertIsNotNone(amount)
+        assert amount is not None
+        self.assertIn('max="500"', amount.group(0))
+        self.assertIn("const IJSB_MAX_AGE={10:65,15:60,20:55,30:45}", HTML)
+        self.assertIn("const IJSB_MIN_AGE=19", HTML)
+
 
 if __name__ == "__main__":
     unittest.main()

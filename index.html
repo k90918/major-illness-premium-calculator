@@ -36,8 +36,8 @@
 </div></section>
 <section class="card"><h2>投保內容</h2><div class="grid">
   <div><label for="term">IJSB 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
-  <div><label for="ijsbAmount">IJSB 保額（萬元）</label><input id="ijsbAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
-</div><p class="note">IJSB 保額未輸入時，試算結果為 0 元。</p></section>
+  <div><label for="ijsbAmount">IJSB 保額（萬元）</label><input id="ijsbAmount" type="number" inputmode="decimal" min="0" max="500" step="1" placeholder="最高500萬元" /></div>
+</div><p class="note">最低投保年齡為 19 歲；10／15／20／30 年期最高投保年齡依序為 65／60／55／45 歲。保額最高 500 萬元，未輸入時為 0 元。</p></section>
 <section class="card"><h2>GWL 小額終身壽險</h2><div class="grid">
   <div><label for="gwlTerm">GWL 繳費年期</label><select id="gwlTerm"><option value="6">6年繳</option><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option></select></div>
   <div><label for="gwlAmount">GWL 保額（萬元）</label><input id="gwlAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
@@ -78,15 +78,20 @@ function ageOn(b){const t=new Date();let a=t.getFullYear()-b.getFullYear();const
 const money=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
 const num=id=>Number(String(document.getElementById(id).value).replace(/[^0-9.]/g,''));
 const rateForAmount=(rates,amount)=>amount===0?0:rates;
-function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ijsbAmt=num('ijsbAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';
+const IJSB_MAX_AGE={10:65,15:60,20:55,30:45};
+const IJSB_MIN_AGE=19;
+const IJSB_MAX_AMOUNT=500;
+function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ijsbAmt=num('ijsbAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';warn.textContent='';
  if(!birth){document.getElementById('detail').textContent='請完整填寫正確的民國出生年月日。';return}const age=ageOn(birth);if(age<0){document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
- const rate=rateForAmount(IJSB[term][gender][age],ijsbAmt),ngoRate=rateForAmount(NGO[gender][age],ngoAmt),gwlRate=rateForAmount(GWL[gwlTerm][gender][age],gwlAmt);if(rate===undefined||ngoRate===undefined||gwlRate===undefined){document.getElementById('detail').textContent='有輸入保額的商品，其年齡超出目前內建費率表的可試算範圍。';return}
+ const messages=[];let ijsbValid=true;
+ if(ijsbAmt>0){if(ijsbAmt>IJSB_MAX_AMOUNT){messages.push('IJSB 保額最高 500 萬元。');ijsbValid=false}else if(age<IJSB_MIN_AGE){messages.push('IJSB 最低投保年齡為 19 歲。');ijsbValid=false}else if(age>IJSB_MAX_AGE[term]){messages.push(`IJSB ${term} 年期最高投保年齡為 ${IJSB_MAX_AGE[term]} 歲。`);ijsbValid=false}}
+ const rate=ijsbAmt===0?0:(ijsbValid?IJSB[term][gender][age]:0),ngoRate=rateForAmount(NGO[gender][age],ngoAmt),gwlRate=rateForAmount(GWL[gwlTerm][gender][age],gwlAmt);if(ngoRate===undefined||gwlRate===undefined){document.getElementById('detail').textContent='有輸入保額的商品，其年齡超出目前內建費率表的可試算範圍。';return}
  const unitsI=ijsbAmt,unitsG=gwlAmt,unitsN=ngoAmt,ia=rate*unitsI,na=ngoRate*unitsN,ga=gwlRate*unitsG;
  const sumNgo=years=>{let total=0,covered=0;for(let i=0;i<years;i++){const r=NGO[gender][age+i];if(r===undefined)break;total+=r*unitsN;covered++}return {total,covered}};
  const ngo20=sumNgo(20),ngo25=sumNgo(25),ngoMaturity=sumNgo(NGO[gender].length-age);
  document.getElementById('ageBadge').textContent=`投保年齡：${age}歲`;const n=document.getElementById('name').value.trim(),p=document.getElementById('person');p.classList.toggle('hidden',!n);p.innerHTML=n?`<strong>${n}</strong><span>${gender==='male'?'男性':'女性'}・${age}歲・民國 ${num('rocYear')} 年出生</span>`:'';
- document.getElementById('ijsbAnnual').textContent=money(ia);document.getElementById('ngoAnnual').textContent=money(na);document.getElementById('ijsbTotal').textContent=money(ia*term);document.getElementById('gwlAnnual').textContent=money(ga);document.getElementById('gwlTotal').textContent=money(ga*gwlTerm);document.getElementById('ngo20Total').textContent=money(ngo20.total);document.getElementById('ngo25Total').textContent=money(ngo25.total);document.getElementById('ngoMaturityTotal').textContent=money(ngoMaturity.total);document.getElementById('detail').textContent=`NGODCR 期滿累計係自 ${age} 歲起，依費率表累計至 ${NGO[gender].length-1} 歲（共 ${ngoMaturity.covered} 年）。`;
- if(ngo20.covered<20||ngo25.covered<25){warn.textContent=`費率表僅提供至 ${NGO[gender].length-1} 歲；20年或25年累計可能未涵蓋完整期間，請留意。`;warn.style.display='block'}
+ document.getElementById('ijsbAnnual').textContent=ijsbValid?money(ia):'不適用';document.getElementById('ngoAnnual').textContent=money(na);document.getElementById('ijsbTotal').textContent=ijsbValid?money(ia*term):'不適用';document.getElementById('gwlAnnual').textContent=money(ga);document.getElementById('gwlTotal').textContent=money(ga*gwlTerm);document.getElementById('ngo20Total').textContent=money(ngo20.total);document.getElementById('ngo25Total').textContent=money(ngo25.total);document.getElementById('ngoMaturityTotal').textContent=money(ngoMaturity.total);document.getElementById('detail').textContent=`NGODCR 期滿累計係自 ${age} 歲起，依費率表累計至 ${NGO[gender].length-1} 歲（共 ${ngoMaturity.covered} 年）。`;
+ if(ngo20.covered<20||ngo25.covered<25)messages.push(`NGODCR 費率表僅提供至 ${NGO[gender].length-1} 歲；20年或25年累計可能未涵蓋完整期間。`);if(messages.length){warn.textContent=messages.join(' ');warn.style.display='block'}
 }
 document.getElementById('calculate').addEventListener('click',calc);document.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',calc));
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./service-worker.js');
