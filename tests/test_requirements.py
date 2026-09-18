@@ -62,6 +62,12 @@ class CalculatorRequirementsTest(unittest.TestCase):
         self.assertIn("const NGO_MAX_AMOUNT=300", HTML)
         self.assertIn("const NGO_MAX_AGE=65", HTML)
 
+    def test_ijsb_total_appears_before_ngodcr_first_year_premium(self):
+        self.assertLess(
+            HTML.index("IJSB 合計總繳保費"),
+            HTML.index("NGODCR 首年保費"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
