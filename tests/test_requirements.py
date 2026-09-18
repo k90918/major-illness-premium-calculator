@@ -19,24 +19,31 @@ class CalculatorRequirementsTest(unittest.TestCase):
         self.assertIn('id="ngoAmount"', HTML)
 
     def test_all_amounts_are_optional_and_default_to_blank(self):
-        for field_id in ("ikcAmount", "gwlAmount", "ngoAmount"):
+        for field_id in ("ijsbAmount", "gwlAmount", "ngoAmount"):
             match = re.search(rf'<input[^>]*id="{field_id}"[^>]*>', HTML)
             self.assertIsNotNone(match, field_id)
             assert match is not None
             self.assertNotRegex(match.group(0), r'value="[1-9][0-9]*"')
 
     def test_amount_fields_use_ten_thousand_dollar_units(self):
-        for product in ("IKC", "GWL", "NGODCR"):
+        for product in ("IJSB(C)", "GWL", "NGODCR"):
             self.assertIn(f"{product} 保額（萬元）", HTML)
-        self.assertNotIn("unitsI=ikcAmt/10000", HTML)
+        self.assertNotIn("unitsI=ijsbAmt/10000", HTML)
         self.assertNotIn("unitsG=gwlAmt/10000", HTML)
         self.assertNotIn("unitsN=ngoAmt/10000", HTML)
 
     def test_blank_amounts_are_explicitly_calculated_as_zero(self):
-        for expression in ("unitsI=ikcAmt", "unitsG=gwlAmt", "unitsN=ngoAmt"):
+        for expression in ("unitsI=ijsbAmt", "unitsG=gwlAmt", "unitsN=ngoAmt"):
             self.assertIn(expression, HTML)
-        self.assertNotRegex(HTML, r"if\([^\n]*!ikcAmt[^\n]*!ngoAmt")
+        self.assertNotRegex(HTML, r"if\([^\n]*!ijsbAmt[^\n]*!ngoAmt")
         self.assertIn("rateForAmount", HTML)
+
+    def test_ijsb_replaces_ikc_and_includes_all_terms(self):
+        self.assertNotIn("IKC", HTML)
+        self.assertIn("const IJSB={", HTML)
+        self.assertIn('<option value="15">15年繳</option>', HTML)
+        self.assertIn("IJSB(C) 年繳保費", HTML)
+        self.assertIn("IJSB(C) 合計總繳保費", HTML)
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@
   </style>
 </head>
 <body><main class="app">
-<header><h1>重大傷病保費試算器</h1><p>輸入基本資料，即時計算 IKC 與 NGODCR 保費。</p></header>
+<header><h1>重大傷病保費試算器</h1><p>輸入基本資料，即時計算 IJSB(C) 與 NGODCR 保費。</p></header>
 <section class="card"><h2>個人資料</h2><div class="grid">
   <div class="full"><label for="name">姓名</label><input id="name" autocomplete="name" placeholder="例如：王小明" /></div>
   <div class="full"><label for="rocYear">出生年月日（民國）</label><div class="birth-grid">
@@ -35,9 +35,9 @@
   <div><label for="gender">性別</label><select id="gender"><option value="male">男性</option><option value="female">女性</option></select></div>
 </div></section>
 <section class="card"><h2>投保內容</h2><div class="grid">
-  <div><label for="term">IKC 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
-  <div><label for="ikcAmount">IKC 保額（萬元）</label><input id="ikcAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
-</div><p class="note">IKC 保額未輸入時，試算結果為 0 元。</p></section>
+  <div><label for="term">IJSB(C) 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
+  <div><label for="ijsbAmount">IJSB(C) 保額（萬元）</label><input id="ijsbAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
+</div><p class="note">IJSB(C) 保額未輸入時，試算結果為 0 元。</p></section>
 <section class="card"><h2>GWL 小額終身壽險</h2><div class="grid">
   <div><label for="gwlTerm">GWL 繳費年期</label><select id="gwlTerm"><option value="6">6年繳</option><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option></select></div>
   <div><label for="gwlAmount">GWL 保額（萬元）</label><input id="gwlAmount" inputmode="decimal" placeholder="未輸入則為0" /></div>
@@ -47,24 +47,25 @@
 </div><p class="note">可單獨輸入保額試算；提供 20 年、25 年及至 84 歲的逐年費率累計比較。未輸入保額時為 0 元。</p><button class="btn" id="calculate">立即試算</button></section>
 <section class="card" id="results" aria-live="polite"><div class="result-title"><h2>試算結果</h2><span class="badge" id="ageBadge">請輸入出生年月日</span></div>
 <div id="person" class="person hidden"></div>
-<div class="result-row"><span>IKC 年繳保費</span><b id="ikcAnnual">—</b></div>
+<div class="result-row"><span>IJSB(C) 年繳保費</span><b id="ijsbAnnual">—</b></div>
 <div class="result-row"><span>NGODCR 首年保費</span><b id="ngoAnnual">—</b></div>
-<div class="result-row"><span>IKC 合計總繳保費</span><b id="ikcTotal">—</b></div>
+<div class="result-row"><span>IJSB(C) 合計總繳保費</span><b id="ijsbTotal">—</b></div>
 <div class="result-row"><span>GWL 年繳保費</span><b id="gwlAnnual">—</b></div>
 <div class="result-row"><span>GWL 合計總繳保費</span><b id="gwlTotal">—</b></div>
 <div class="result-row"><span>NGODCR 20年累計保費</span><b id="ngo20Total">—</b></div>
 <div class="result-row"><span>NGODCR 25年累計保費</span><b id="ngo25Total">—</b></div>
 <div class="result-row emphasis"><span>NGODCR 至期滿累計保費</span><b id="ngoMaturityTotal">—</b></div>
 <p class="helper" id="detail">請填寫出生年月日後試算。</p><p class="warning" id="warning"></p></section>
-<p class="foot">費率依所提供之 IKC（113.01.01）及 NGODCR 費率表建置；單位為每萬元保額之年繳保費。實際承保、保費與商品條款仍以保險公司核保及當時公告為準。</p>
+<p class="foot">費率依所提供之 IJSB(C)（114.06.13）及 NGODCR 費率表建置；單位為每萬元保額之年繳保費。實際承保、保費與商品條款仍以保險公司核保及當時公告為準。</p>
 </main><script>
 // 每萬元保額年繳費率；索引為投保年齡（0歲起）
-const IKC={
-  10:{male:[398,405,411,416,424,431,439,449,458,468,478,482,487,497,509,520,532,542,553,562,573,575,579,591,602,615,627,639,653,667,680,681,686,702,716,727,740,755,769,787,797,802,811,825,841,857,876,891,899,917,935,953,972,991,1013,1041,1113,1194,1287,1415,1536,1672,1836,1880,2064,2455],female:[386,391,397,403,410,418,426,435,445,455,465,468,472,483,493,503,514,524,535,546,556,558,563,574,585,596,608,620,632,645,653,658,663,676,689,703,717,726,740,754,769,774,777,793,808,823,839,849,852,867,881,896,911,927,942,958,975,992,1012,1039,1059,1131,1204,1320,1414,1519]},
-  20:{male:[218,221,225,226,228,228,233,238,244,248,254,257,263,269,275,281,287,293,298,304,309,311,313,320,326,333,340,348,356,362,370,373,377,386,394,404,413,423,433,444,454,466,478,490,504,515,538,548,577,612,650,690,735,783,836,892],female:[211,213,217,217,221,221,226,230,236,241,247,248,254,260,266,272,277,283,289,294,300,302,305,311,318,324,331,338,345,352,357,361,364,372,380,389,398,407,416,426,436,447,458,469,481,492,498,502,515,533,550,577,605,635,667,702]},
-  30:{male:[155,158,161,162,165,168,171,175,179,183,188,189,194,198,203,207,212,216,221,225,230,231,233,238,242,248,254,260,266,273,279,282,288,295,303,313,321,331,345,357,382,388,415,440,472,502],female:[150,152,154,157,159,162,166,169,174,177,182,183,187,192,196,201,205,210,214,218,225,225,226,231,236,242,247,252,258,265,272,273,279,286,293,300,308,317,326,338,352,358,377,396,423,444]}
+const IJSB={
+  10:{male:[356,361,367,372,378,385,392,400,409,418,427,430,433,443,453,463,472,482,491,500,510,512,515,525,536,547,558,570,581,593,606,607,610,623,636,644,657,670,683,696,704,709,713,726,739,748,761,775,778,791,804,816,828,840,852,864,905,917,930,949,961,974,986,992,997,1009],female:[375,379,386,392,399,407,415,424,433,442,452,455,458,468,478,488,498,509,519,529,540,543,546,557,568,579,591,602,614,626,634,637,640,652,664,677,689,697,709,721,734,736,739,746,757,768,778,783,787,790,798,807,814,821,829,837,845,853,862,870,879,904,913,927,935,942]},
+  15:{male:[242,245,249,251,254,258,263,269,274,280,285,287,292,298,305,312,318,325,331,337,343,345,347,354,362,369,377,385,394,401,410,412,415,425,434,442,452,461,471,481,490,498,505,516,527,534,549,557,565,576,588,599,610,622,634,646,680,694,708,728,748],female:[254,257,261,264,269,273,278,284,290,297,302,305,308,315,322,329,336,343,350,357,364,366,369,377,385,392,400,409,417,426,431,435,438,447,456,465,475,483,493,503,513,519,526,534,543,552,557,559,565,572,582,589,596,603,610,618,626,634,643,652,661]},
+  20:{male:[184,186,189,190,192,194,198,202,206,211,214,216,220,225,230,235,240,245,249,254,259,261,263,268,274,280,286,292,299,304,311,315,318,326,334,342,350,359,367,376,386,395,405,415,426,432,448,453,464,476,487,499,511,524,538,552],female:[193,195,198,199,202,205,209,214,218,223,227,229,232,237,243,248,253,259,264,270,275,277,280,286,292,298,305,312,318,326,331,334,337,345,353,361,370,378,387,396,404,413,422,431,439,448,450,451,457,469,479,486,493,500,509,517]},
+  30:{male:[125,127,129,130,133,135,138,141,144,147,151,152,156,160,163,167,171,175,178,182,185,187,189,193,197,202,207,212,218,224,229,233,238,245,252,260,268,276,286,295,311,313,325,336,349,361],female:[132,133,135,137,140,143,146,149,152,156,160,161,165,169,173,177,181,186,190,194,199,201,203,207,212,219,223,229,235,242,248,251,256,263,270,278,285,293,301,312,322,327,337,346,358,367]}
 };
-// IKC 各繳費年期均依原始費率表對應欄位建置。
+// IJSB(C) 費率依 114.06.13 費率表建置。
 const GWL={
 6:{male:[397,405,413,421,429,437,446,455,464,474,483,492,501,511,521,531,542,552,563,574,584,596,607,619,630,643,655,667,679,693,707,720,734,748,762,776,791,806,821,836,851,866,882,898,913,931,946,964,981,998,1015,1032,1050,1068,1086,1104,1123,1141,1160,1179,1197,1218,1237,1257,1278,1297,1319,1339,1360,1380,1400,1422,1443,1464,1485,1501,1516,1532,1547,1563,1578,1594,1609,1623,1643],female:[356,363,370,377,385,392,400,408,416,425,433,441,450,458,467,476,486,496,506,515,525,536,546,557,568,579,590,601,613,625,637,650,662,675,688,701,714,728,743,757,771,786,801,816,831,847,862,879,896,913,930,947,964,982,1000,1017,1037,1056,1076,1095,1114,1135,1155,1176,1197,1218,1240,1262,1284,1306,1327,1351,1373,1396,1418,1440,1463,1485,1506,1528,1551,1572,1594,1616,1635]},
 10:{male:[248,252,257,263,268,273,278,284,290,295,301,307,313,319,325,332,338,345,351,358,365,372,379,386,393,401,409,417,425,433,441,450,458,467,476,485,494,503,513,523,532,542,552,562,572,583,593,604,615,626,637,648,660,671,683,694,707,719,732,745,757,771,784,798,812,826,842,858,873,890,906,917,926,936,945,957],female:[222,226,231,235,240,245,250,255,260,265,270,275,281,286,292,298,303,309,315,322,328,334,341,347,354,361,368,375,382,390,398,405,413,421,429,438,446,455,464,473,481,491,500,510,520,529,539,550,560,570,581,592,603,614,626,637,650,661,674,687,699,712,725,739,753,767,783,798,813,829,845,862,879,897,916,935]},
@@ -77,14 +78,14 @@ function ageOn(b){const t=new Date();let a=t.getFullYear()-b.getFullYear();const
 const money=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
 const num=id=>Number(String(document.getElementById(id).value).replace(/[^0-9.]/g,''));
 const rateForAmount=(rates,amount)=>amount===0?0:rates;
-function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ikcAmt=num('ikcAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';
+function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ijsbAmt=num('ijsbAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';
  if(!birth){document.getElementById('detail').textContent='請完整填寫正確的民國出生年月日。';return}const age=ageOn(birth);if(age<0){document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
- const rate=rateForAmount(IKC[term][gender][age],ikcAmt),ngoRate=rateForAmount(NGO[gender][age],ngoAmt),gwlRate=rateForAmount(GWL[gwlTerm][gender][age],gwlAmt);if(rate===undefined||ngoRate===undefined||gwlRate===undefined){document.getElementById('detail').textContent='有輸入保額的商品，其年齡超出目前內建費率表的可試算範圍。';return}
- const unitsI=ikcAmt,unitsG=gwlAmt,unitsN=ngoAmt,ia=rate*unitsI,na=ngoRate*unitsN,ga=gwlRate*unitsG;
+ const rate=rateForAmount(IJSB[term][gender][age],ijsbAmt),ngoRate=rateForAmount(NGO[gender][age],ngoAmt),gwlRate=rateForAmount(GWL[gwlTerm][gender][age],gwlAmt);if(rate===undefined||ngoRate===undefined||gwlRate===undefined){document.getElementById('detail').textContent='有輸入保額的商品，其年齡超出目前內建費率表的可試算範圍。';return}
+ const unitsI=ijsbAmt,unitsG=gwlAmt,unitsN=ngoAmt,ia=rate*unitsI,na=ngoRate*unitsN,ga=gwlRate*unitsG;
  const sumNgo=years=>{let total=0,covered=0;for(let i=0;i<years;i++){const r=NGO[gender][age+i];if(r===undefined)break;total+=r*unitsN;covered++}return {total,covered}};
  const ngo20=sumNgo(20),ngo25=sumNgo(25),ngoMaturity=sumNgo(NGO[gender].length-age);
  document.getElementById('ageBadge').textContent=`投保年齡：${age}歲`;const n=document.getElementById('name').value.trim(),p=document.getElementById('person');p.classList.toggle('hidden',!n);p.innerHTML=n?`<strong>${n}</strong><span>${gender==='male'?'男性':'女性'}・${age}歲・民國 ${num('rocYear')} 年出生</span>`:'';
- document.getElementById('ikcAnnual').textContent=money(ia);document.getElementById('ngoAnnual').textContent=money(na);document.getElementById('ikcTotal').textContent=money(ia*term);document.getElementById('gwlAnnual').textContent=money(ga);document.getElementById('gwlTotal').textContent=money(ga*gwlTerm);document.getElementById('ngo20Total').textContent=money(ngo20.total);document.getElementById('ngo25Total').textContent=money(ngo25.total);document.getElementById('ngoMaturityTotal').textContent=money(ngoMaturity.total);document.getElementById('detail').textContent=`NGODCR 期滿累計係自 ${age} 歲起，依費率表累計至 ${NGO[gender].length-1} 歲（共 ${ngoMaturity.covered} 年）。`;
+ document.getElementById('ijsbAnnual').textContent=money(ia);document.getElementById('ngoAnnual').textContent=money(na);document.getElementById('ijsbTotal').textContent=money(ia*term);document.getElementById('gwlAnnual').textContent=money(ga);document.getElementById('gwlTotal').textContent=money(ga*gwlTerm);document.getElementById('ngo20Total').textContent=money(ngo20.total);document.getElementById('ngo25Total').textContent=money(ngo25.total);document.getElementById('ngoMaturityTotal').textContent=money(ngoMaturity.total);document.getElementById('detail').textContent=`NGODCR 期滿累計係自 ${age} 歲起，依費率表累計至 ${NGO[gender].length-1} 歲（共 ${ngoMaturity.covered} 年）。`;
  if(ngo20.covered<20||ngo25.covered<25){warn.textContent=`費率表僅提供至 ${NGO[gender].length-1} 歲；20年或25年累計可能未涵蓋完整期間，請留意。`;warn.style.display='block'}
 }
 document.getElementById('calculate').addEventListener('click',calc);document.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',calc));

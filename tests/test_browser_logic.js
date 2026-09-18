@@ -5,11 +5,11 @@ const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
 function run(amounts) {
   const values = {
     name: '', rocYear: '75', birthMonth: '6', birthDay: '15', gender: 'male',
-    term: '20', ikcAmount: amounts.ikc || '', gwlTerm: '20',
+    term: '20', ijsbAmount: amounts.ijsb || '', gwlTerm: '20',
     gwlAmount: amounts.gwl || '', ngoAmount: amounts.ngo || ''
   };
-  const ids = ['warning', 'detail', 'ageBadge', 'person', 'ikcAnnual', 'ngoAnnual',
-    'ikcTotal', 'gwlAnnual', 'gwlTotal', 'ngo20Total', 'ngo25Total',
+  const ids = ['warning', 'detail', 'ageBadge', 'person', 'ijsbAnnual', 'ngoAnnual',
+    'ijsbTotal', 'gwlAnnual', 'gwlTotal', 'ngo20Total', 'ngo25Total',
     'ngoMaturityTotal', 'calculate'];
   const elements = {};
   for (const id of [...Object.keys(values), ...ids]) {
@@ -24,7 +24,7 @@ function run(amounts) {
   };
   const navigator = {};
   const location = { protocol: 'file:' };
-  eval(script + "\ncalc(); elements._oneNgoUnit = money(NGO[document.getElementById('gender').value][ageOn(rocBirthDate())]);");
+  eval(script + "\ncalc(); elements._oneNgoUnit = money(NGO[document.getElementById('gender').value][ageOn(rocBirthDate())]); elements._ijsbLengths = [10,15,20,30].map(term => [IJSB[term].male.length, IJSB[term].female.length]);");
   return elements;
 }
 
@@ -35,14 +35,15 @@ function assert(condition, message) {
 const isZeroCurrency = value => /^(NT)?\$0$/.test(value);
 
 const blank = run({});
-for (const id of ['ikcAnnual', 'ikcTotal', 'gwlAnnual', 'gwlTotal', 'ngoAnnual', 'ngo20Total', 'ngo25Total', 'ngoMaturityTotal']) {
+for (const id of ['ijsbAnnual', 'ijsbTotal', 'gwlAnnual', 'gwlTotal', 'ngoAnnual', 'ngo20Total', 'ngo25Total', 'ngoMaturityTotal']) {
   assert(isZeroCurrency(blank[id].textContent), `空白保額的 ${id} 應為 0 元，實際為 ${blank[id].textContent}`);
 }
 
 const ngoOnly = run({ ngo: '1' });
-assert(isZeroCurrency(ngoOnly.ikcAnnual.textContent), 'NGODCR 單獨試算時 IKC 應為 0');
+assert(isZeroCurrency(ngoOnly.ijsbAnnual.textContent), 'NGODCR 單獨試算時 IJSB(C) 應為 0');
 assert(isZeroCurrency(ngoOnly.gwlAnnual.textContent), 'NGODCR 單獨試算時 GWL 應為 0');
 assert(!isZeroCurrency(ngoOnly.ngoAnnual.textContent), 'NGODCR 單獨試算應產生保費');
 assert(!isZeroCurrency(ngoOnly.ngo20Total.textContent), 'NGODCR 單獨試算應產生 20 年累計保費');
 assert(ngoOnly.ngoAnnual.textContent === ngoOnly._oneNgoUnit, '輸入 1 應代表保額 1 萬元');
-console.log('通過：空白保額歸零、NGODCR 可單獨試算、民國日期可計算');
+assert(JSON.stringify(ngoOnly._ijsbLengths) === JSON.stringify([[66,66],[61,61],[56,56],[46,46]]), 'IJSB(C) 各年期費率筆數不正確');
+console.log('通過：IJSB(C) 費率、空白保額歸零、NGODCR 單獨試算、民國日期');
