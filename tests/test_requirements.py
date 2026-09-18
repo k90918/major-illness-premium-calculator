@@ -26,7 +26,7 @@ class CalculatorRequirementsTest(unittest.TestCase):
             self.assertNotRegex(match.group(0), r'value="[1-9][0-9]*"')
 
     def test_amount_fields_use_ten_thousand_dollar_units(self):
-        for product in ("IJSB(C)", "GWL", "NGODCR"):
+        for product in ("IJSB", "GWL", "NGODCR"):
             self.assertIn(f"{product} 保額（萬元）", HTML)
         self.assertNotIn("unitsI=ijsbAmt/10000", HTML)
         self.assertNotIn("unitsG=gwlAmt/10000", HTML)
@@ -42,8 +42,9 @@ class CalculatorRequirementsTest(unittest.TestCase):
         self.assertNotIn("IKC", HTML)
         self.assertIn("const IJSB={", HTML)
         self.assertIn('<option value="15">15年繳</option>', HTML)
-        self.assertIn("IJSB(C) 年繳保費", HTML)
-        self.assertIn("IJSB(C) 合計總繳保費", HTML)
+        self.assertNotIn("IJSB(C)", HTML)
+        self.assertIn("IJSB 年繳保費", HTML)
+        self.assertIn("IJSB 合計總繳保費", HTML)
 
 
 if __name__ == "__main__":

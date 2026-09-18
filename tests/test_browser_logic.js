@@ -40,10 +40,10 @@ for (const id of ['ijsbAnnual', 'ijsbTotal', 'gwlAnnual', 'gwlTotal', 'ngoAnnual
 }
 
 const ngoOnly = run({ ngo: '1' });
-assert(isZeroCurrency(ngoOnly.ijsbAnnual.textContent), 'NGODCR 單獨試算時 IJSB(C) 應為 0');
+assert(isZeroCurrency(ngoOnly.ijsbAnnual.textContent), 'NGODCR 單獨試算時 IJSB 應為 0');
 assert(isZeroCurrency(ngoOnly.gwlAnnual.textContent), 'NGODCR 單獨試算時 GWL 應為 0');
 assert(!isZeroCurrency(ngoOnly.ngoAnnual.textContent), 'NGODCR 單獨試算應產生保費');
 assert(!isZeroCurrency(ngoOnly.ngo20Total.textContent), 'NGODCR 單獨試算應產生 20 年累計保費');
 assert(ngoOnly.ngoAnnual.textContent === ngoOnly._oneNgoUnit, '輸入 1 應代表保額 1 萬元');
-assert(JSON.stringify(ngoOnly._ijsbLengths) === JSON.stringify([[66,66],[61,61],[56,56],[46,46]]), 'IJSB(C) 各年期費率筆數不正確');
-console.log('通過：IJSB(C) 費率、空白保額歸零、NGODCR 單獨試算、民國日期');
+assert(JSON.stringify(ngoOnly._ijsbLengths) === JSON.stringify([[66,66],[61,61],[56,56],[46,46]]), 'IJSB 各年期費率筆數不正確');
+console.log('通過：IJSB 費率、空白保額歸零、NGODCR 單獨試算、民國日期');
