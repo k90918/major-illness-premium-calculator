@@ -54,6 +54,14 @@ class CalculatorRequirementsTest(unittest.TestCase):
         self.assertIn("const IJSB_MAX_AGE={10:65,15:60,20:55,30:45}", HTML)
         self.assertIn("const IJSB_MIN_AGE=19", HTML)
 
+    def test_ngodcr_underwriting_limits_are_present(self):
+        amount = re.search(r'<input[^>]*id="ngoAmount"[^>]*>', HTML)
+        self.assertIsNotNone(amount)
+        assert amount is not None
+        self.assertIn('max="300"', amount.group(0))
+        self.assertIn("const NGO_MAX_AMOUNT=300", HTML)
+        self.assertIn("const NGO_MAX_AGE=65", HTML)
+
 
 if __name__ == "__main__":
     unittest.main()

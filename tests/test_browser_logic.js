@@ -61,4 +61,14 @@ const rocYearAge46 = String(new Date().getFullYear() - 1911 - 46);
 const over30YearAge = run({ ijsb: '100' }, { term: '30', rocYear: rocYearAge46, birthMonth: '1', birthDay: '1' });
 assert(over30YearAge.ijsbAnnual.textContent === '不適用', '46 歲投保 30 年期時應顯示不適用');
 assert(over30YearAge.warning.textContent.includes('30 年期最高投保年齡為 45 歲'), '30 年期超齡時應顯示 45 歲限制');
+
+const ngoOverAmount = run({ ngo: '301' });
+assert(ngoOverAmount.ngoAnnual.textContent === '不適用', 'NGODCR 超過 300 萬元時應顯示不適用');
+assert(ngoOverAmount.ngo20Total.textContent === '不適用', 'NGODCR 超額時累計保費應顯示不適用');
+assert(ngoOverAmount.warning.textContent.includes('最高 300 萬元'), 'NGODCR 超過 300 萬元時應顯示保額限制');
+
+const rocYearAge66 = String(new Date().getFullYear() - 1911 - 66);
+const ngoOverAge = run({ ngo: '100' }, { rocYear: rocYearAge66, birthMonth: '1', birthDay: '1' });
+assert(ngoOverAge.ngoAnnual.textContent === '不適用', '66 歲投保 NGODCR 時應顯示不適用');
+assert(ngoOverAge.warning.textContent.includes('最高投保年齡為 65 歲'), 'NGODCR 超齡時應顯示 65 歲限制');
 console.log('通過：IJSB 費率、空白保額歸零、NGODCR 單獨試算、民國日期');
