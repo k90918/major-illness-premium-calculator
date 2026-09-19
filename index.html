@@ -15,7 +15,7 @@
     .app{max-width:680px;margin:auto;padding:calc(16px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom))}
     header{padding:8px 4px 18px} h1{font-size:26px;letter-spacing:.02em;margin:0 0 7px;color:var(--navy)} header p{margin:0;font-size:14px;line-height:1.55;color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 12px #1232 10}
-    h2{font-size:16px;margin:0 0 14px;color:var(--navy)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.birth-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:8px}.field-hint{font-size:11px;color:var(--muted);margin-top:5px}
+    h2{font-size:16px;margin:0 0 14px;color:var(--navy)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.birth-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:8px}.field-hint{font-size:11px;color:var(--muted);margin-top:5px}.computed-field{min-height:46px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#eef5f6;color:var(--navy);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
     label{display:block;font-size:13px;font-weight:650;color:#38505a;margin:0 0 6px} input,select{appearance:none;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #b9cbd1;border-radius:11px;background:#fff;color:var(--ink);min-height:46px} input:focus,select:focus{outline:3px solid #bfe8e5;border-color:var(--teal)}
     .note{font-size:12px;color:var(--muted);line-height:1.55;margin:12px 0 0}.btn{border:0;border-radius:12px;width:100%;min-height:51px;color:white;background:var(--teal);font-size:17px;font-weight:700;letter-spacing:.04em;margin-top:15px}.btn:active{transform:scale(.99);background:#08726c}
     .person{display:flex;align-items:center;gap:10px;background:#e8f5f4;padding:11px 13px;border-radius:12px;color:#185f60;font-size:14px;margin-bottom:13px}.person strong{font-size:16px}
@@ -33,6 +33,8 @@
     <div><input id="birthDay" inputmode="numeric" placeholder="日" aria-label="出生日" /><div class="field-hint">日</div></div>
   </div></div>
   <div><label for="gender">性別</label><select id="gender"><option value="male">男性</option><option value="female">女性</option></select></div>
+  <div><label>保險年齡</label><div class="computed-field" id="insuranceAge">—</div></div>
+  <div><label>距保險年齡增加 1 歲</label><div class="computed-field" id="ageCountdown">—</div></div>
 </div></section>
 <section class="card"><h2>投保內容</h2><div class="grid">
   <div><label for="term">IJSB 繳費年期</label><select id="term"><option value="10">10年繳</option><option value="15">15年繳</option><option value="20" selected>20年繳</option><option value="30">30年繳</option></select></div>
@@ -47,8 +49,6 @@
 </div><p class="note">最高投保年齡為 65 歲，保額最高 300 萬元；提供 20 年、25 年及至 84 歲的逐年費率累計比較。未輸入保額時為 0 元。</p><button class="btn" id="calculate">立即試算</button></section>
 <section class="card" id="results" aria-live="polite"><div class="result-title"><h2>試算結果</h2><span class="badge" id="ageBadge">請輸入出生年月日</span></div>
 <div id="person" class="person hidden"></div>
-<div class="result-row"><span>保險年齡</span><b id="insuranceAge">—</b></div>
-<div class="result-row"><span>距保險年齡增加 1 歲</span><b id="ageCountdown">—</b></div>
 <div class="result-row"><span>IJSB 年繳保費</span><b id="ijsbAnnual">—</b></div>
 <div class="result-row"><span>IJSB 合計總繳保費</span><b id="ijsbTotal">—</b></div>
 <div class="result-row"><span>NGODCR 首年保費</span><b id="ngoAnnual">—</b></div>
@@ -89,7 +89,7 @@ const IJSB_MAX_AMOUNT=500;
 const NGO_MAX_AMOUNT=300;
 const NGO_MAX_AGE=65;
 function calc(){const birth=rocBirthDate(),gender=document.getElementById('gender').value,term=Number(document.getElementById('term').value),ijsbAmt=num('ijsbAmount'),ngoAmt=num('ngoAmount'),gwlTerm=Number(document.getElementById('gwlTerm').value),gwlAmt=num('gwlAmount'),warn=document.getElementById('warning');warn.style.display='none';warn.textContent='';
- if(!birth){document.getElementById('detail').textContent='請完整填寫正確的民國出生年月日。';return}const insurance=insuranceAgeOn(birth),age=insurance.actualAge;const pricingAge=insurance.insuranceAge;if(age<0){document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
+ if(!birth){document.getElementById('insuranceAge').textContent='—';document.getElementById('ageCountdown').textContent='—';document.getElementById('detail').textContent='請完整填寫正確的民國出生年月日。';return}const insurance=insuranceAgeOn(birth),age=insurance.actualAge;const pricingAge=insurance.insuranceAge;if(age<0){document.getElementById('insuranceAge').textContent='—';document.getElementById('ageCountdown').textContent='—';document.getElementById('detail').textContent='出生年月日不可晚於今天。';return}
  const messages=[];let ijsbValid=true,ngoValid=true;
  if(ijsbAmt>0){if(ijsbAmt>IJSB_MAX_AMOUNT){messages.push('IJSB 保額最高 500 萬元。');ijsbValid=false}else if(pricingAge<IJSB_MIN_AGE){messages.push('IJSB 最低投保年齡為 19 歲。');ijsbValid=false}else if(pricingAge>IJSB_MAX_AGE[term]){messages.push(`IJSB ${term} 年期最高投保年齡為 ${IJSB_MAX_AGE[term]} 歲。`);ijsbValid=false}}
  if(ngoAmt>0){if(ngoAmt>NGO_MAX_AMOUNT){messages.push('NGODCR 保額最高 300 萬元。');ngoValid=false}else if(pricingAge>NGO_MAX_AGE){messages.push('NGODCR 最高投保年齡為 65 歲。');ngoValid=false}}

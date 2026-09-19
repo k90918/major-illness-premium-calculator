@@ -69,8 +69,12 @@ class CalculatorRequirementsTest(unittest.TestCase):
         )
 
     def test_insurance_age_and_countdown_are_shown_and_used(self):
-        self.assertIn('id="insuranceAge"', HTML)
-        self.assertIn('id="ageCountdown"', HTML)
+        personal_section = HTML.split('<section class="card"><h2>個人資料</h2>', 1)[1].split('</section>', 1)[0]
+        results_section = HTML.split('<section class="card" id="results"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('id="insuranceAge"', personal_section)
+        self.assertIn('id="ageCountdown"', personal_section)
+        self.assertNotIn('id="insuranceAge"', results_section)
+        self.assertNotIn('id="ageCountdown"', results_section)
         self.assertIn("function insuranceAgeOn(", HTML)
         self.assertIn("const pricingAge=insurance.insuranceAge", HTML)
 
