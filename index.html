@@ -26,14 +26,14 @@
 <body><main class="app">
 <header><h1>重大傷病保費試算器</h1><p>輸入基本資料，即時計算 IJSB 與 NGODCR 保費。</p></header>
 <section class="card"><h2>個人資料</h2><div class="grid">
-  <div class="full"><label for="name">姓名</label><input id="name" autocomplete="name" placeholder="例如：王小明" /></div>
+  <div><label for="name">姓名</label><input id="name" autocomplete="name" placeholder="例如：王小明" /></div>
+  <div><label>保險年齡</label><div class="computed-field" id="insuranceAge">—</div></div>
   <div class="full"><label for="rocYear">出生年月日（民國）</label><div class="birth-grid">
     <div><input id="rocYear" inputmode="numeric" placeholder="年，例如75" aria-label="民國年" /><div class="field-hint">民國年</div></div>
     <div><input id="birthMonth" inputmode="numeric" placeholder="月" aria-label="出生月" /><div class="field-hint">月</div></div>
     <div><input id="birthDay" inputmode="numeric" placeholder="日" aria-label="出生日" /><div class="field-hint">日</div></div>
   </div></div>
   <div><label for="gender">性別</label><select id="gender"><option value="male">男性</option><option value="female">女性</option></select></div>
-  <div><label>保險年齡</label><div class="computed-field" id="insuranceAge">—</div></div>
   <div><label>距保險年齡增加 1 歲</label><div class="computed-field" id="ageCountdown">—</div></div>
 </div></section>
 <section class="card"><h2>投保內容</h2><div class="grid">
