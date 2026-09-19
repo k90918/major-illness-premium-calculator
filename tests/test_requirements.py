@@ -73,8 +73,10 @@ class CalculatorRequirementsTest(unittest.TestCase):
         results_section = HTML.split('<section class="card" id="results"', 1)[1].split('</section>', 1)[0]
         self.assertIn('id="insuranceAge"', personal_section)
         self.assertIn('id="ageCountdown"', personal_section)
-        self.assertLess(personal_section.index('id="name"'), personal_section.index('id="insuranceAge"'))
-        self.assertLess(personal_section.index('id="insuranceAge"'), personal_section.index('id="rocYear"'))
+        self.assertLess(personal_section.index('id="name"'), personal_section.index('id="gender"'))
+        self.assertLess(personal_section.index('id="gender"'), personal_section.index('id="rocYear"'))
+        self.assertLess(personal_section.index('id="rocYear"'), personal_section.index('id="insuranceAge"'))
+        self.assertLess(personal_section.index('id="insuranceAge"'), personal_section.index('id="ageCountdown"'))
         self.assertNotIn('id="insuranceAge"', results_section)
         self.assertNotIn('id="ageCountdown"', results_section)
         self.assertIn("function insuranceAgeOn(", HTML)
